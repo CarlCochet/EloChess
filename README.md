@@ -27,4 +27,4 @@ in a pgn where the first match is Carlsen (white) vs Caruana (black), you have t
 
 ...
 
-To sum this up, just put the elos in the order of the apparition of the players in the .pgn file. 
+To sum this up, just put in the .elo file the elos in the order of the apparition of the players in the .pgn file. 
