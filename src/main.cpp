@@ -21,58 +21,77 @@ int max_index(std::vector<double> vector);
 
 int main() {
 
-    std::vector<std::string> players;
-    std::vector<std::string> opening;
-    std::vector<double> opCount;
-    std::vector<double> elos(0), score(0);
-    //  = {3178, 3144, 3143, 3323, 3198, 3461, 3284, 3399, 3282, 3112, 3140, 3040, 3139, 3089,
-    //                                3184, 3272, 3122, 3098, 3350, 3125, 3027, 3223, 3184, 3267, 3197, 3403, 3114, 3012,
-    //                                3161, 3157, 3183, 3280, 3182}
+    // Variables init
+    // Players stores the players names, opening stores the openings names
+    std::vector<std::string> players, opening;
 
+    // opCount counts the use of an opening, elos stores the elos data, score stores the total results
+    std::vector<double> opCount, elos(0), score(0);
+
+    // wins, count the wins, loss counts the loss, draws counts the draws. White versions add the side information
+    // totalMatch counts the matches per player, resultSum counts wins/loss/draws of full tournament
     std::vector<int> wins(0), loss(0), draws(0), totalMatch(0), resultSum(3), winWhite(0), lossWhite(0), drawWhite(0);
+
+    // k is the max elo earn per match, matchCount counts matches of full tourney, white and black are indexes for array
+    // matchMaxMove stores index of longest game, maxMove stores move amount in longest game
+    // readChoice select the elo detection mode, strValue is for substr conversion to int
     int k(10), matchCount(0), white(-1), black(-1), matchMaxMove(0), maxMove(0), readChoice(0), strValue(0);
+
+    // nextMatch tells wether we are reading the header or the moves, validMatch verify the match has been played
     bool nextMatch(true), validMatch(false);
+
+    // gameStart detects the header start, game detect the moves start, lineCheck gets the 7 first symbols of a line
+    // substr is used whenever a part of a line is needed
     std::string gameStart, game, lineCheck, substr;
 
     std::cout << "Welcome to EloChess! This program calculates elo evolution for players from a tournament file and "
                  "also gives some additional statistics.\n" << std::endl;
 
     while(readChoice != 1 && readChoice!= 2) {
-        std::cout << "Do you want to get players elo from the tournament pgn data (might not be correct), or do you want to"
-                   " read the elo.elo file (you can fix elo manually there)? (type 1 or 2)";
+        std::cout << "Do you want to get players elo from the tournament pgn data (might not be correct), or do you "
+                     "want to read the elo.elo file (you can fix elo manually there)? (type 1 or 2)";
         std::cin >> readChoice;
     }
 
     std::cout << std::endl;
 
+    // Choice 1 so we read the whole pgn first to detect max elo of each player as a starting point
     if(readChoice == 1){
         std::ifstream file("../tournament.pgn");
         if(file) {
             std::string line;
 
             while (getline(file, line)) {
+
+                // We take 6 chars to check Event
                 if(line.length() >= 6) {
                     gameStart = line.substr(0, 6);
                 }
+                // 2 chars to detect 1.
                 if(line.length() >= 2){
                     game = line.substr(0, 2);
                 }
+                // Detects a new match is setting up
                 if(gameStart == "[Event") {
                     if (!nextMatch) {
                         nextMatch = true;
                     }
-
+                // Detects the moves start
                 } else if(game == "1."){
                     nextMatch = false;
                     white = -1;
                     black = -1;
                 } else {
+                    // Here it means we are in the header, it's an optimization as we won't process lines when parsing
+                    // the actual moves of the game (which is obviously useless)
                     if(nextMatch) {
 
+                        // This substirng tells us where we are in the header
                         if (line.length() >= 7) {
                             lineCheck = line.substr(0, 7);
                         }
 
+                        // For white and black we create a new space in all the related arrays. Also putting the names
                         if (lineCheck == "[White " || lineCheck == "[Black ") {
                             substr = line.substr(8, line.length() - 10);
 
@@ -88,8 +107,12 @@ int main() {
                                 lossWhite.push_back(0);
                                 drawWhite.push_back(0);
                             }
+
+                            // This gives us the index of the player in the array
                             ptrdiff_t pos = std::distance(players.begin(),
                                                           std::find(players.begin(), players.end(), substr));
+
+                            // And we allocate the position to white and black, for clarity.
                             if (pos < players.size()) {
                                 if (lineCheck == "[White ") {
                                     white = pos;
@@ -98,6 +121,8 @@ int main() {
                                 }
                             }
                         }
+
+                        // Now we get the elos and select the max (to minimize errors due to bad configuration in pgn)
                         if(lineCheck == "[WhiteE"){
                             substr = line.substr(11, line.length()-13);
                             strValue = atoi(substr.c_str());
@@ -118,6 +143,7 @@ int main() {
         }
         file.close();
     } else {
+        // Here we only read elo.elo so we can just get the values lines by lines
         std::ifstream file("../elo.elo");
         if(file) {
             std::string line;
@@ -132,6 +158,7 @@ int main() {
 
     std::ifstream file("../tournament.pgn");
 
+    // And now it's time for the big part!
     if(file){
         std::string line;
 
@@ -306,7 +333,6 @@ int main() {
     std::cout << "Games: " << matchCount << " | White wins: " << resultSum[0] << " | Black wins: " << resultSum[1] <<
               " | Draws: " << resultSum[2] << std::endl << std::endl;
 
-    //printf("Press enter to exit.\n");
     system("pause");
     return 0;
 }
