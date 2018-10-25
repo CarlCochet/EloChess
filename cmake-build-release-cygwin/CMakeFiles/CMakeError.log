@@ -1,0 +1,16 @@
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make.exe" "cmTC_fb54d/fast"
+/usr/bin/make -f CMakeFiles/cmTC_fb54d.dir/build.make CMakeFiles/cmTC_fb54d.dir/build
+make[1]: Entering directory '/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fb54d.dir/testCXXCompiler.cxx.o
+"/cygdrive/c/Program Files (x86)/CodeBlocks/MinGW/bin/c++.exe"     -o CMakeFiles/cmTC_fb54d.dir/testCXXCompiler.cxx.o -c "/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp/testCXXCompiler.cxx"
+c++.exe: error: /cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp/testCXXCompiler.cxx: No such file or directory
+c++.exe: fatal error: no input files
+compilation terminated.
+make[1]: *** [CMakeFiles/cmTC_fb54d.dir/build.make:66: CMakeFiles/cmTC_fb54d.dir/testCXXCompiler.cxx.o] Error 1
+make[1]: Leaving directory '/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp'
+make: *** [Makefile:126: cmTC_fb54d/fast] Error 2
+
+

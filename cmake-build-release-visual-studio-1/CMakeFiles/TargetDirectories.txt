@@ -1,0 +1,3 @@
+C:/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-visual-studio-1/CMakeFiles/elochess.dir
+C:/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-visual-studio-1/CMakeFiles/edit_cache.dir
+C:/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-visual-studio-1/CMakeFiles/rebuild_cache.dir

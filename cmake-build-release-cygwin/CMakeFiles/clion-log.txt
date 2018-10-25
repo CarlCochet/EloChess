@@ -1,0 +1,45 @@
+"C:\Users\Carl Cochet\.CLion2018.1\system\cygwin_cmake\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" "/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess"
+-- The C compiler identification is GNU 7.3.0
+-- The CXX compiler identification is GNU 4.9.2
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /cygdrive/c/Program Files (x86)/CodeBlocks/MinGW/bin/c++.exe
+-- Check for working CXX compiler: /cygdrive/c/Program Files (x86)/CodeBlocks/MinGW/bin/c++.exe -- broken
+CMake Error at /cygdrive/c/Users/Carl Cochet/.CLion2018.1/system/cygwin_cmake/share/cmake-3.10.3/Modules/CMakeTestCXXCompiler.cmake:45 (message):
+  The C++ compiler
+
+    "/cygdrive/c/Program Files (x86)/CodeBlocks/MinGW/bin/c++.exe"
+
+  is not able to compile a simple test program.
+
+  It fails with the following output:
+
+    Change Dir: /cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp
+    
+    Run Build Command:"/usr/bin/make.exe" "cmTC_fb54d/fast"
+    /usr/bin/make -f CMakeFiles/cmTC_fb54d.dir/build.make CMakeFiles/cmTC_fb54d.dir/build
+    make[1]: Entering directory '/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp'
+    Building CXX object CMakeFiles/cmTC_fb54d.dir/testCXXCompiler.cxx.o
+    "/cygdrive/c/Program Files (x86)/CodeBlocks/MinGW/bin/c++.exe"     -o CMakeFiles/cmTC_fb54d.dir/testCXXCompiler.cxx.o -c "/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp/testCXXCompiler.cxx"
+    c++.exe: error: /cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp/testCXXCompiler.cxx: No such file or directory
+    c++.exe: fatal error: no input files
+    compilation terminated.
+    make[1]: *** [CMakeFiles/cmTC_fb54d.dir/build.make:66: CMakeFiles/cmTC_fb54d.dir/testCXXCompiler.cxx.o] Error 1
+    make[1]: Leaving directory '/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeTmp'
+    make: *** [Makefile:126: cmTC_fb54d/fast] Error 2
+    
+
+  
+
+  CMake will not be able to correctly generate this project.
+Call Stack (most recent call first):
+  CMakeLists.txt:2 (project)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeOutput.log".
+See also "/cygdrive/c/Users/Carl Cochet/Desktop/C++Projects/elochess/cmake-build-release-cygwin/CMakeFiles/CMakeError.log".
