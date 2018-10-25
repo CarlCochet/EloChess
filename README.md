@@ -22,8 +22,8 @@ In this file you can manually set the elos, but they need to be entered in the o
 in a pgn where the first match is Carlsen (white) vs Caruana (black), you have to put this in the elo.elo file:
 
 2839
-
 2827
+
 ...
 
 To sum this up, just put the elos in the order of the apparition of the players in the .pgn file. 
