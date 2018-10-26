@@ -351,7 +351,7 @@ int main() {
     // Now everything has been calculated it is all info display
 
     // Displaying the openings stats
-    while(opening.size() > 0){
+    while(!opening.empty()){
         // We get the max to sort in decreasing order
         int i = max_index(opCount);
         std::cout << std::setw(50) << opening[i] << " played " << std::setw(3) << opCount[i] << " times." << std::endl;
@@ -365,8 +365,9 @@ int main() {
               "---------------\n" << std::endl;
 
     // Displaying the players stats
-    while(players.size() > 0){
+    while(!players.empty()){
         // We get the max score to sort in decreasing order
+
         int i = max_index(score);
 
         std::cout << std::setw(19) << players[i] << " (" << std::setw(7) << elos[i] << ") | Wins: " << std::setw(2) <<
@@ -405,7 +406,7 @@ int main() {
 int max_index(std::vector<double> vector) {
     double maxi = -1;
     int index = 0;
-    if(vector.size() > 0) {
+    if(!vector.empty()) {
         for (int i(0); i < vector.size(); i++) {
             if(vector[i] > maxi){
                 maxi = vector[i];
