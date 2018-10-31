@@ -31,11 +31,13 @@ int main() {
     // wins, count the wins, loss counts the loss, draws counts the draws. White versions add the side information
     // totalMatch counts the matches per player, resultSum counts wins/loss/draws of full tournament
     std::vector<int> wins(0), loss(0), draws(0), totalMatch(0), resultSum(3), winWhite(0), lossWhite(0), drawWhite(0);
+    std::vector<int> totalGameLength(0), opWhiteWins(0), opDraws(0), opBlackWins(0);
 
     // k is the max elo earn per match, matchCount counts matches of full tourney, white and black are indexes for array
     // matchMaxMove stores index of longest game, maxMove stores move amount in longest game
     // readChoice select the elo detection mode, strValue is for substr conversion to int
     int k(10), matchCount(0), white(-1), black(-1), matchMaxMove(0), maxMove(0), readChoice(0), strValue(0);
+    double w(0);
 
     // nextMatch tells wether we are reading the header or the moves, validMatch verify the match has been played
     bool nextMatch(true), validMatch(false);
@@ -57,7 +59,7 @@ int main() {
 
     // Choice 1 so we read the whole pgn first to detect max elo of each player as a starting point
     if(readChoice == 1){
-        std::ifstream file("../tournament.pgn");
+        std::ifstream file("tournament.pgn");
         if(file) {
             std::string line;
 
@@ -76,7 +78,7 @@ int main() {
                     if (!nextMatch) {
                         nextMatch = true;
                     }
-                // Detects the moves start
+                    // Detects the moves start
                 } else if(game == "1."){
                     nextMatch = false;
                     white = -1;
@@ -93,7 +95,7 @@ int main() {
 
                         // For white and black we create a new space in all the related arrays. Also putting the names
                         if (lineCheck == "[White " || lineCheck == "[Black ") {
-                            substr = line.substr(8, line.length() - 10);
+                            substr = line.substr(8, line.length() - 11);
 
                             if (!(std::find(players.begin(), players.end(), substr) != players.end())) {
                                 players.push_back(substr);
@@ -106,6 +108,7 @@ int main() {
                                 winWhite.push_back(0);
                                 lossWhite.push_back(0);
                                 drawWhite.push_back(0);
+                                totalGameLength.push_back(0);
                             }
 
                             // This gives us the index of the player in the array
@@ -144,7 +147,7 @@ int main() {
         file.close();
     } else {
         // Here we only read elo.elo so we can just get the values lines by lines
-        std::ifstream file("../elo.elo");
+        std::ifstream file("elo.elo");
         if(file) {
             std::string line;
             while (getline(file, line)) {
@@ -155,8 +158,9 @@ int main() {
     }
 
 
+    printf("\nElo data loaded.\n\n");
 
-    std::ifstream file("../tournament.pgn");
+    std::ifstream file("tournament.pgn");
 
     // And now it's time for the big part!
     if(file){
@@ -174,7 +178,10 @@ int main() {
             if(gameStart == "[Event") {
                 if (!nextMatch) {
                     matchCount++;
+
+                    // Just setting back nextMatch and validMatch at true by default...
                     nextMatch = true;
+                    validMatch = true;
                 }
 
             } else if(game == "1."){
@@ -189,9 +196,8 @@ int main() {
                         lineCheck = line.substr(0, 7);
                     }
 
-
                     if(lineCheck == "[White " || lineCheck == "[Black "){
-                        substr = line.substr(8, line.length()-10);
+                        substr = line.substr(8, line.length()-11);
 
                         // This is the exact same as part 1 except that we don't get the elos as we already have them
                         if(!(std::find(players.begin(), players.end(), substr) != players.end())){
@@ -204,10 +210,11 @@ int main() {
                             winWhite.push_back(0);
                             lossWhite.push_back(0);
                             drawWhite.push_back(0);
+                            totalGameLength.push_back(0);
                         }
 
                         ptrdiff_t pos = std::distance(players.begin(),
-                                std::find(players.begin(), players.end(), substr));
+                                                      std::find(players.begin(), players.end(), substr));
                         if(pos < players.size()) {
                             if(lineCheck == "[White "){
                                 white = pos;
@@ -221,9 +228,7 @@ int main() {
                     if(lineCheck == "[Result") {
 
                         // Here we get the result string
-                        substr = line.substr(9, line.length() - 11);
-
-                        double w = 0;
+                        substr = line.substr(9, line.length() - 12);
 
                         // For the elo calculation we put the values for white side and then reverse the calculation
                         // for the black side as elo calculation is symmetrical
@@ -272,6 +277,8 @@ int main() {
                             // we substract 1 to matchCount as we added 1 at the start of this invalid match
                             matchCount--;
                             validMatch = false;
+
+                            //std::cout << "Invalid match!" << std::endl;
                         }
 
                         // If the match has a valid result we can calculate elos
@@ -301,43 +308,63 @@ int main() {
                             // already have all the values set
                             elos[white] += k * (w - pd);
                             elos[black] += k * (pd - w);
+                            
                         }
-
-                        // Just setting back validMatch at true by default...
-                        validMatch = true;
+                        //printf("Elo processed.\n");
                     }
 
                     // This is for pure statistics and get the amount of moves in a game
-                    if(lineCheck == "[PlyCou"){
-                        if(line.length() > 11) {
+                    if (lineCheck == "[PlyCou") {
+                        if (line.length() > 11) {
                             substr = line.substr(11, line.length() - 13);
                         }
-
+                        
                         // Playcount gives the number of half-moves, so we divide by 2 to get the number of moves
-                        int moveNum = (atoi( substr.c_str() )) / 2;
+                        int moveNum = (atoi(substr.c_str())) / 2;
+                        totalGameLength[white] += moveNum;
+                        totalGameLength[black] += moveNum;
 
                         // And we check wether it is the longest game or not
-                        if(moveNum > maxMove){
+                        if (moveNum > maxMove) {
                             maxMove = moveNum;
                             matchMaxMove = matchCount;
                         }
                     }
+                        //printf("Playcount processed.\n");
 
                     // This is also pure statistics, for the openings
-                    if(lineCheck == "[Openin"){
-                        if(line.length() > 10) {
-                            substr = line.substr(10, line.length() - 12);
+                    if (lineCheck == "[Openin") {
+
+                        if (line.length() > 10) {
+                            substr = line.substr(10, line.length() - 13);
                         }
 
                         // We get the name of the opening, init at 1 if it was never used
-                        if(!(std::find(opening.begin(), opening.end(), substr) != opening.end())){
+                        if (!(std::find(opening.begin(), opening.end(), substr) != opening.end())) {
                             opening.push_back(substr);
                             opCount.push_back(1);
+                            opWhiteWins.push_back(0);
+                            opDraws.push_back(0);
+                            opBlackWins.push_back(0);
+                            if(w == 0.5){
+                                opDraws[opDraws.size() - 1]++;
+                            } else if(w == 1){
+                                opWhiteWins[opWhiteWins.size() - 1]++;
+                            } else if(w == 0){
+                                opBlackWins[opBlackWins.size() - 1]++;
+                            }
                         } else {
                             // If it was already used, then we add 1, to count the times it was used in the tourney
                             ptrdiff_t opIndex = std::distance(opening.begin(),
                                                               std::find(opening.begin(), opening.end(), substr));
                             opCount[opIndex]++;
+                            if(w == 0.5){
+                                opDraws[opIndex]++;
+                            } else if(w == 1){
+                                opWhiteWins[opIndex]++;
+                            } else if(w == 0){
+                                opBlackWins[opIndex]++;
+                            }
                         }
                     }
                 }
@@ -347,18 +374,25 @@ int main() {
         std::cout << "Error: File not found." << std::endl;
     }
 
-
     // Now everything has been calculated it is all info display
+
+    std::cout << opening.size() << std::endl;
 
     // Displaying the openings stats
     while(!opening.empty()){
+
         // We get the max to sort in decreasing order
         int i = max_index(opCount);
-        std::cout << std::setw(50) << opening[i] << " played " << std::setw(3) << opCount[i] << " times." << std::endl;
+        std::cout << std::setw(50) << opening[i] << " played " << std::setw(3) << opCount[i] << " times." <<
+                  " | White wins: " << std::setw(3) << opWhiteWins[i] << " | Black wins: " << std::setw(3) <<
+                  opBlackWins[i] << " | Draws: " << std::setw(3) << opDraws[i] << std::endl;
 
         // And we delete the max so that we don't get the same value in the next loop
         opening.erase(opening.begin() + i);
         opCount.erase(opCount.begin() + i);
+        opBlackWins.erase(opBlackWins.begin() + i);
+        opWhiteWins.erase(opWhiteWins.begin() + i);
+        opDraws.erase(opDraws.begin() + i);
     }
 
     std::cout << "\n" << "-----------------------------------------------------------------------------------------" <<
@@ -369,14 +403,15 @@ int main() {
         // We get the max score to sort in decreasing order
 
         int i = max_index(score);
-
-        std::cout << std::setw(19) << players[i] << " (" << std::setw(7) << elos[i] << ") | Wins: " << std::setw(2) <<
-                  wins[i] << " (" << std::setw(2) << winWhite[i] << " " << std::setw(2) << wins[i] - winWhite[i] <<
-                  ") | Loss: " << std::setw(2) << loss[i] << " (" << std::setw(2) << lossWhite[i] << " " <<
-                  std::setw(2) << loss[i] - lossWhite[i] << ") | Draws: " << std::setw(2) << draws[i] << " (" <<
-                  std::setw(2) << drawWhite[i] << " " << std::setw(2) << draws[i] - drawWhite[i] <<
-                  ") | Score: " << std::setw(4) << score[i] << "/" << std::setw(2) << totalMatch[i] << std::endl;
-
+        if(totalMatch[i] > 0){
+            std::cout << std::setw(19) << players[i] << " (" << std::setw(7) << elos[i] << ") | Wins: " << std::setw(3) <<
+                    wins[i] << " (" << std::setw(2) << winWhite[i] << " " << std::setw(2) << wins[i] - winWhite[i] <<
+                    ") | Loss: " << std::setw(3) << loss[i] << " (" << std::setw(2) << lossWhite[i] << " " <<
+                    std::setw(2) << loss[i] - lossWhite[i] << ") | Draws: " << std::setw(3) << draws[i] << " (" <<
+                    std::setw(2) << drawWhite[i] << " " << std::setw(2) << draws[i] - drawWhite[i] <<
+                    ") | Score: " << std::setw(5) << score[i] << "/" << std::setw(3) << totalMatch[i] <<
+                    " | Average length: " << std::setw(3) << (totalGameLength[i] / totalMatch[i]) << std::endl;
+        }
         // And we delete the max so that we don't get the same value in the next loop
         players.erase(players.begin() + i);
         elos.erase(elos.begin() + i);
@@ -388,6 +423,7 @@ int main() {
         winWhite.erase(winWhite.begin() + i);
         lossWhite.erase(lossWhite.begin() + i);
         drawWhite.erase(drawWhite.begin() + i);
+        totalGameLength.erase(totalGameLength.begin() + i);
     }
 
     // Finally we display general info, here longest game with number of moves
