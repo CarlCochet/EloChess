@@ -9,7 +9,7 @@ All you need is a .pgn file with all the games from the tournament, and the star
 
 
 There is a elochess.exe ../cmake-build-debug, if it does not work it probably means you will have to compile it yourself using the
-MakeFile that comes with the software. 
+MakeFile that comes with the software, or just doing a simple compilation on the main.cpp (has all the source is here... yes I know it's bad and dirty, but it's just a little soft so... whatever.)
 
 
 You have 2 options when you run the program:
