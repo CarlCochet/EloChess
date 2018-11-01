@@ -18,6 +18,7 @@
 #include <iomanip>
 
 int max_index(std::vector<double> vector);
+int max_index_SB(std::vector<double> vector, std::vector<double> tieBreak);
 
 int main() {
 
@@ -26,7 +27,7 @@ int main() {
     std::vector<std::string> players, opening;
 
     // opCount counts the use of an opening, elos stores the elos data, score stores the total results
-    std::vector<double> opCount, elos(0), score(0);
+    std::vector<double> opCount, elos(0), score(0), sb;
 
     // wins, count the wins, loss counts the loss, draws counts the draws. White versions add the side information
     // totalMatch counts the matches per player, resultSum counts wins/loss/draws of full tournament
@@ -109,6 +110,7 @@ int main() {
                                 lossWhite.push_back(0);
                                 drawWhite.push_back(0);
                                 totalGameLength.push_back(0);
+                                sb.push_back(0);
                             }
 
                             // This gives us the index of the player in the array
@@ -143,6 +145,8 @@ int main() {
                     }
                 }
             }
+        } else {
+            printf("\nElo data failed to load.\n\n");
         }
         file.close();
     } else {
@@ -153,6 +157,8 @@ int main() {
             while (getline(file, line)) {
                 elos.push_back(atoi(line.c_str()));
             }
+        } else {
+            printf("\nElo data failed to load.\n\n");
         }
         file.close();
     }
@@ -211,6 +217,7 @@ int main() {
                             lossWhite.push_back(0);
                             drawWhite.push_back(0);
                             totalGameLength.push_back(0);
+                            sb.push_back(0);
                         }
 
                         ptrdiff_t pos = std::distance(players.begin(),
@@ -247,6 +254,11 @@ int main() {
                             // And this is the draws as white for the player (no need to count black draws as we deduce
                             // it with a substraction at the end of the program)
                             drawWhite[white]++;
+
+                            // SB tie break calculation
+                            sb[white] += score[black] / 2;
+                            sb[black] += score[white] / 2;
+
                         } else if (substr == "1-0") {
 
                             // Add the wins/loss stats
@@ -259,6 +271,10 @@ int main() {
 
                             // wins as white for the players, we deduce black wins with a substract at the end
                             winWhite[white]++;
+
+                            // SB tie break calculation
+                            sb[white] += score[black];
+
                         } else if (substr == "0-1") {
 
                             // Add the wins/loss stats
@@ -271,6 +287,10 @@ int main() {
 
                             // loss as white for the players, we deduce black loss with a substract at the end
                             lossWhite[white]++;
+
+                            // SB tie break calculation
+                            sb[black] += score[white];
+
                         } else {
 
                             // If the result isn't normal, then the match is invalid and should not be counted
@@ -315,6 +335,7 @@ int main() {
 
                     // This is for pure statistics and get the amount of moves in a game
                     if (lineCheck == "[PlyCou") {
+
                         if (line.length() > 11) {
                             substr = line.substr(11, line.length() - 13);
                         }
@@ -368,6 +389,7 @@ int main() {
                         }
                     }
                 }
+                
             }
         }
     } else {
@@ -375,8 +397,6 @@ int main() {
     }
 
     // Now everything has been calculated it is all info display
-
-    std::cout << opening.size() << std::endl;
 
     // Displaying the openings stats
     while(!opening.empty()){
@@ -402,7 +422,7 @@ int main() {
     while(!players.empty()){
         // We get the max score to sort in decreasing order
 
-        int i = max_index(score);
+        int i = max_index_SB(score, sb);
         if(totalMatch[i] > 0){
             std::cout << std::setw(19) << players[i] << " (" << std::setw(7) << elos[i] << ") | Wins: " << std::setw(3) <<
                     wins[i] << " (" << std::setw(2) << winWhite[i] << " " << std::setw(2) << wins[i] - winWhite[i] <<
@@ -410,6 +430,7 @@ int main() {
                     std::setw(2) << loss[i] - lossWhite[i] << ") | Draws: " << std::setw(3) << draws[i] << " (" <<
                     std::setw(2) << drawWhite[i] << " " << std::setw(2) << draws[i] - drawWhite[i] <<
                     ") | Score: " << std::setw(5) << score[i] << "/" << std::setw(3) << totalMatch[i] <<
+                    " | SB: " << std::setw(7) << sb[i] <<
                     " | Average length: " << std::setw(3) << (totalGameLength[i] / totalMatch[i]) << std::endl;
         }
         // And we delete the max so that we don't get the same value in the next loop
@@ -424,6 +445,7 @@ int main() {
         lossWhite.erase(lossWhite.begin() + i);
         drawWhite.erase(drawWhite.begin() + i);
         totalGameLength.erase(totalGameLength.begin() + i);
+        sb.erase(sb.begin() + i);
     }
 
     // Finally we display general info, here longest game with number of moves
@@ -440,8 +462,9 @@ int main() {
 
 // This function is just there to easily get the index of the max element of an array of doubles
 int max_index(std::vector<double> vector) {
-    double maxi = -1;
-    int index = 0;
+    double maxi(-1);
+    int index(0);
+
     if(!vector.empty()) {
         for (int i(0); i < vector.size(); i++) {
             if(vector[i] > maxi){
@@ -450,5 +473,29 @@ int max_index(std::vector<double> vector) {
             }
         }
     }
+
+    return index;
+}
+
+// In order to sort taking in account the SB score when 2 players are tied
+int max_index_SB(std::vector<double> vector, std::vector<double> tieBreak){
+    double maxi(-1);
+    double tbMaxi(-1);
+    int index(0);
+
+    if(!vector.empty()) {
+        for (int i(0); i < vector.size(); i++) {
+            if(vector[i] > maxi){
+                maxi = vector[i];
+                tbMaxi = tieBreak[i];
+                index = i;
+            } else if((vector[i] == maxi) && (tieBreak[i] > tbMaxi)){
+                maxi = vector[i];
+                tbMaxi = tieBreak[i];
+                index = i;
+            }
+        }
+    }
+
     return index;
 }
